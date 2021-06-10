@@ -157,5 +157,49 @@ RSpec.describe ElasticWhenever::Task::Target do
         ).create
       end
     end
+
+    context "when launch type is NOT_SET" do
+      let(:option) do
+        ElasticWhenever::Option.new(%w(
+          -i test
+          --launch-type NOT_SET
+        ))
+      end
+
+      it "creates target" do
+        expect(client).to receive(:put_targets).with(
+          rule: "test_rule",
+          targets: [
+            {
+              id: "26d98175755bb458e8ba55a1f5cfb2dc0e10dd81",
+              arn: "arn:aws:ecs:us-east-1:123456789:cluster/test",
+              input: {
+                containerOverrides: [
+                  {
+                    name: "testContainer",
+                    command: ["bundle", "exec", "rake", "spec"]
+                  }
+                ]
+              }.to_json,
+              role_arn: "arn:aws:ecs:us-east-1:123456789:role/testRole",
+              ecs_parameters: {
+                task_definition_arn: "arn:aws:ecs:us-east-1:123456789:task-definition/wordpress:2",
+                task_count: 1,
+              }
+            }
+          ]
+        )
+
+        ElasticWhenever::Task::Target.new(
+          option,
+          cluster: cluster,
+          definition: definition,
+          container: "testContainer",
+          commands: ["bundle", "exec", "rake", "spec"],
+          rule: rule,
+          role: role,
+          ).create
+      end
+    end
   end
 end

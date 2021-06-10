@@ -93,6 +93,11 @@ module ElasticWhenever
             },
             platform_version: platform_version,
           }
+        elsif launch_type == "NOT_SET"
+          {
+            task_definition_arn: definition.arn,
+            task_count: 1,
+          }
         else
           {
             launch_type: launch_type,
